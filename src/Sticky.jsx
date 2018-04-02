@@ -36,12 +36,16 @@ class Sticky extends Component {
         this.handleResize = this.handleResize.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.handleScrollStart = this.handleScrollStart.bind(this);
+        this.handleOuterRef = this.handleOuterRef.bind(this);
+        this.handleInnerRef = this.handleInnerRef.bind(this);
         this.delta = 0;
         this.stickyTop = 0;
         this.stickyBottom = 0;
         this.frozen = false;
         this.skipNextScrollEvent = false;
         this.scrollTop = -1;
+        this.outerRef = null;
+        this.innerRef = null;
 
         this.bottomBoundaryTarget;
         this.topTarget;
@@ -126,6 +130,14 @@ class Sticky extends Component {
         });
     }
 
+    handleOuterRef(ref) {
+        this.outerRef = ref;
+    }
+
+    handleInnerRef(ref) {
+        this.innerRef = ref;
+    }
+
     /**
      * Update the initial position, width, and height. It should update whenever children change.
      * @param {Object} options optional top and bottomBoundary new values
@@ -133,10 +145,12 @@ class Sticky extends Component {
     updateInitialDimension (options) {
         options = options || {}
 
-        var {outer, inner} = this.refs;
+        if (!this.outerRef || !this.innerRef) {
+            return;
+        }
 
-        var outerRect = outer.getBoundingClientRect();
-        var innerRect = inner.getBoundingClientRect();
+        var outerRect = this.outerRef.getBoundingClientRect();
+        var innerRect = this.innerRef.getBoundingClientRect();
 
         var width = outerRect.width || outerRect.right - outerRect.left;
         var height = innerRect.height || innerRect.bottom - innerRect.top;;
@@ -383,8 +397,8 @@ class Sticky extends Component {
         })
 
         return (
-            <div ref='outer' className={outerClasses} style={outerStyle}>
-                <div ref='inner' className='sticky-inner-wrapper' style={innerStyle}>
+            <div ref={this.handleOuterRef} className={outerClasses} style={outerStyle}>
+                <div ref={this.handleInnerRef} className='sticky-inner-wrapper' style={innerStyle}>
                     {this.props.children}
                 </div>
             </div>
